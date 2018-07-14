@@ -5,8 +5,8 @@ import android.arch.persistence.room.PrimaryKey
 
 @Entity
 data class TodoList (
-    @PrimaryKey(autoGenerate = true)
+        @PrimaryKey(autoGenerate = true)
     val id: Int?,
-    val name: String,
-    val description: String
+        val title: String,
+        val description: String
 )

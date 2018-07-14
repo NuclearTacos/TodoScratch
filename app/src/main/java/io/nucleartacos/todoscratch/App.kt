@@ -13,7 +13,7 @@ lateinit var db: TodoDatabase
 class App : Application() {
 
     override fun onCreate() {
-        db = Room.databaseBuilder(applicationContext, TodoDatabase::class.java, "TodoDatabase")
+        db = Room.databaseBuilder(applicationContext, TodoDatabase::class.java, "TodoDatabase").allowMainThreadQueries()
                 .fallbackToDestructiveMigration()
                 .build()
 

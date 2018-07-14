@@ -4,14 +4,18 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import io.nucleartacos.todoscratch.R
 import io.nucleartacos.todoscratch.data.TodoList
+import io.nucleartacos.todoscratch.db
+import kotlin.concurrent.thread
 
-class TodoListListAdapter() : RecyclerView.Adapter<TodoListListAdapter.ViewHolder>() {
+class TodoListListAdapter(val launchTodoListEditActivity: (Int?) -> Unit) : RecyclerView.Adapter<TodoListListAdapter.ViewHolder>() {
     val list = mutableListOf<TodoList>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewTpe: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.todolist_row, parent,false)
+
         return ViewHolder(view)
     }
 
@@ -20,12 +24,21 @@ class TodoListListAdapter() : RecyclerView.Adapter<TodoListListAdapter.ViewHolde
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        //holder.editText.text = list[position].title
+        holder.updateView(position)
     }
 
     inner class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
-      /*  val editText = view.findViewById<TextView>(R.id.todoTitleEditText)
-        val checkBox = view.findViewById<CheckBox>(R.id.isDoneCheckBox)*/
-// oops, I included this form the wrong thing I was working on
+        val titleTextView = view.findViewById<TextView>(R.id.todoListNameLabel)
+        val descriptionTextView = view.findViewById<TextView>(R.id.todoListDescriptionLabel)
+
+        fun updateView(index: Int) {
+            titleTextView.text = list[index].title
+            descriptionTextView.text = list[index].description
+
+
+            view.setOnClickListener {
+                launchTodoListEditActivity(list[index].id)
+            }
+        }
     }
 }
