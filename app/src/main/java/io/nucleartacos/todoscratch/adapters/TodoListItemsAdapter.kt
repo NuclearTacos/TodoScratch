@@ -1,6 +1,7 @@
 package io.nucleartacos.todoscratch
 
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,10 +15,10 @@ class TodoListItemsAdapter(val todoListId: Int) : RecyclerView.Adapter<TodoListI
     val list = mutableListOf<TodoItem>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewTpe: Int): ViewHolder {
-        thread {
-            for (item in db.TodoItemDao().getAll() ) list.add(item)
-        }
-
+       /* thread {
+            var itemsFromList = db.TodoItemDao().getByListId(todoListId)
+            for (item in itemsFromList) list.add(item)
+        }*/ // This was here, but I don't think it's necessary
         val view = LayoutInflater.from(parent.context).inflate(R.layout.todolistitem_row, parent,false)
 
         return ViewHolder(view)
@@ -30,6 +31,51 @@ class TodoListItemsAdapter(val todoListId: Int) : RecyclerView.Adapter<TodoListI
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.setListId(todoListId)
         holder.updateView(position)
+        if (position != list.size) {
+            var myTitleFocus = todoTitleFocus(list[position].id!!)
+            myTitleFocus.setMyHolder(holder)
+
+            holder.editText.setOnFocusChangeListener(myTitleFocus)
+            holder.checkBox.setOnClickListener { View ->
+                thread {
+                    var oldItem = db.TodoItemDao().getById(list[position].id!!)
+                    db.TodoItemDao().insert(
+                            TodoItem(
+                                    oldItem.id,
+                                    oldItem.title,
+                                    holder.checkBox.isChecked,
+                                    oldItem.todoListId
+                            )
+                    )
+                }
+            }
+        }
+    }
+
+    class todoTitleFocus(var itemId: Int): View.OnFocusChangeListener {
+
+        lateinit var holder: ViewHolder
+
+        fun setMyHolder(incomingHolder: ViewHolder){
+            holder = incomingHolder
+        }
+
+        override fun onFocusChange(view: View?, hasFocus: Boolean) {
+            if (!hasFocus) {
+                Log.d("Butt", "Lost Focus: Text is :" + holder.editText.text.toString())
+                thread {
+                    var oldItem = db.TodoItemDao().getById(itemId)
+                    db.TodoItemDao().insert(
+                            TodoItem(
+                                    oldItem.id,
+                                    holder.editText.text.toString(),
+                                    oldItem.isDone,
+                                    oldItem.todoListId
+                            )
+                    )
+                }
+            }
+        }
     }
 
     inner class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
@@ -51,6 +97,8 @@ class TodoListItemsAdapter(val todoListId: Int) : RecyclerView.Adapter<TodoListI
                 checkBox.visibility = View.VISIBLE
                 newItemButton.visibility = View.GONE
 
+                //checkBox.set
+
                 checkBox.setOnClickListener() {
                     // launchCreatorActivity(list[index].id) // replace this with what clicking the checkbox should do.
                 }
@@ -59,9 +107,21 @@ class TodoListItemsAdapter(val todoListId: Int) : RecyclerView.Adapter<TodoListI
                 checkBox.visibility = View.GONE
                 newItemButton.visibility = View.VISIBLE
                 newItemButton.setOnClickListener() {
-                    list.add(TodoItem(null,"",false, todoListId!!))
+                    thread{
+                        list.add(
+                                db.TodoItemDao().getById(
+                                        db.TodoItemDao().insert(
+                                                TodoItem(
+                                                        null,
+                                                        "",
+                                                        false, todoListId!!)
+                                        ).toInt()
+                                )
+                        )
+                    }
                 }
             }
         }
+
     }
 }
