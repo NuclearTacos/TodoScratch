@@ -38,6 +38,13 @@ class TodoListListAdapter(val launchTodoListEditActivity: (Int?) -> Unit) : Recy
 
             view.setOnClickListener {
                 launchTodoListEditActivity(list[index].id)
+                true
+            }
+
+            view.setOnLongClickListener{
+                db.TodoItemDao().deleteByListId(list[index].id!!)
+                db.TodoListDao().deleteById(list[index].id!!)
+                true
             }
         }
     }

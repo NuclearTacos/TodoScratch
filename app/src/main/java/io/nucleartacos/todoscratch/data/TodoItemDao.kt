@@ -31,4 +31,8 @@ interface TodoItemDao {
     //Delete By Id
     @Query("Delete From TodoItem Where id = :id")
     fun deleteById(id: Int)
+
+    //Delete By List Id
+    @Query("Delete From TodoItem Where todoListId = :id")
+    fun deleteByListId(id: Int)
 }

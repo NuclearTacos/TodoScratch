@@ -7,20 +7,22 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
+import android.widget.EditText
 import android.widget.TextView
 import io.nucleartacos.todoscratch.data.TodoItem
+import io.nucleartacos.todoscratch.data.TodoList
 import kotlin.concurrent.thread
+
+    /*const val FOCUSED_TITLE = "Titile"
+    const val FOCUSED_BOX = "Box"*/
 
 class TodoListItemsAdapter(val todoListId: Int) : RecyclerView.Adapter<TodoListItemsAdapter.ViewHolder>() {
     val list = mutableListOf<TodoItem>()
+    var lastFocusedRow: Int? = null
+    //var lastFocusedType: String? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewTpe: Int): ViewHolder {
-       /* thread {
-            var itemsFromList = db.TodoItemDao().getByListId(todoListId)
-            for (item in itemsFromList) list.add(item)
-        }*/ // This was here, but I don't think it's necessary
         val view = LayoutInflater.from(parent.context).inflate(R.layout.todolistitem_row, parent,false)
-
         return ViewHolder(view)
     }
 
@@ -31,8 +33,13 @@ class TodoListItemsAdapter(val todoListId: Int) : RecyclerView.Adapter<TodoListI
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.setListId(todoListId)
         holder.updateView(position)
+
+        var setLastFocused = { rowNumber: Int?, focusedType: String? ->
+            lastFocusedRow = rowNumber
+        }
+
         if (position != list.size) {
-            var myTitleFocus = todoTitleFocus(list[position].id!!)
+            var myTitleFocus = todoItemTitleFocus(list[position].id!!, setLastFocused)
             myTitleFocus.setMyHolder(holder)
 
             holder.editText.setOnFocusChangeListener(myTitleFocus)
@@ -49,10 +56,17 @@ class TodoListItemsAdapter(val todoListId: Int) : RecyclerView.Adapter<TodoListI
                     )
                 }
             }
+
+            holder.checkBox.setOnLongClickListener {
+                thread {
+                    db.TodoItemDao().deleteById(list[position].id!!)
+                }
+                true
+            }
         }
     }
 
-    class todoTitleFocus(var itemId: Int): View.OnFocusChangeListener {
+    class todoItemTitleFocus(var itemId: Int, val setLastFocused: (Int?, String?) -> Unit ): View.OnFocusChangeListener {
 
         lateinit var holder: ViewHolder
 
@@ -62,7 +76,6 @@ class TodoListItemsAdapter(val todoListId: Int) : RecyclerView.Adapter<TodoListI
 
         override fun onFocusChange(view: View?, hasFocus: Boolean) {
             if (!hasFocus) {
-                Log.d("Butt", "Lost Focus: Text is :" + holder.editText.text.toString())
                 thread {
                     var oldItem = db.TodoItemDao().getById(itemId)
                     db.TodoItemDao().insert(
@@ -74,21 +87,32 @@ class TodoListItemsAdapter(val todoListId: Int) : RecyclerView.Adapter<TodoListI
                             )
                     )
                 }
-            }
+            }  /*else {
+                setLastFocused(holder.myPosition, FOCUSED_TITLE)
+                Log.d("Butt", "Position: "+ holder.myPosition+" // FocusedType"+FOCUSED_TITLE)
+            }*/
         }
     }
+
 
     inner class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val editText = view.findViewById<TextView>(R.id.todoTitleEditText)
         val checkBox = view.findViewById<CheckBox>(R.id.isDoneCheckBox)
         val newItemButton = view.findViewById<Button>(R.id.newTodoButton)
         var todoListId: Int? = null
+        var myPosition: Int? = null
 
         fun setListId(listId: Int) {
             todoListId = listId
         }
 
         fun updateView(index: Int) {
+            myPosition = index
+
+            /*if (index == lastFocusedRow) {
+                editText.requestFocus()
+            }// this block should take focus if the box was the last one focused before it rebound*/
+
             if (index != list.size) {
                 editText.text = list[index].title
                 checkBox.isChecked = list[index].isDone
@@ -96,32 +120,24 @@ class TodoListItemsAdapter(val todoListId: Int) : RecyclerView.Adapter<TodoListI
                 editText.visibility = View.VISIBLE
                 checkBox.visibility = View.VISIBLE
                 newItemButton.visibility = View.GONE
-
-                //checkBox.set
-
-                checkBox.setOnClickListener() {
-                    // launchCreatorActivity(list[index].id) // replace this with what clicking the checkbox should do.
-                }
             } else {
                 editText.visibility = View.GONE
                 checkBox.visibility = View.GONE
                 newItemButton.visibility = View.VISIBLE
-                newItemButton.setOnClickListener() {
+                newItemButton.setOnClickListener {
                     thread{
-                        list.add(
-                                db.TodoItemDao().getById(
-                                        db.TodoItemDao().insert(
-                                                TodoItem(
-                                                        null,
-                                                        "",
-                                                        false, todoListId!!)
-                                        ).toInt()
-                                )
+                        db.TodoItemDao().getById(
+                                db.TodoItemDao().insert(
+                                        TodoItem(
+                                                null,
+                                                "",
+                                                false, todoListId!!)
+                                ).toInt()
                         )
                     }
+                    //lastFocusedType = FOCUSED_BOX
                 }
             }
         }
-
     }
 }
