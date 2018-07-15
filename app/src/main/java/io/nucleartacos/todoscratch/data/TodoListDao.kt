@@ -13,6 +13,10 @@ interface TodoListDao {
     @Query("Select * From TodoList Where id = :id")
     fun getById(id: Int): TodoList
 
+    //Get number of lists
+    @Query("Select Count(*) From TodoList")
+    fun getNumberOfLists(): Int
+
     //Insert
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(todoList: TodoList): Long

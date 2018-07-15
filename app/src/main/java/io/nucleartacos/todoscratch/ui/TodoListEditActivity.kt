@@ -85,29 +85,6 @@ class TodoListEditActivity : AppCompatActivity() {
                 })
     } //onCreate
 
-    /*fun saveListChanges(titleEditText: EditText, descriptionEditText: EditText) {
-         Log.d("butt","Toasted: "+ todoListId)
-         var todoList: TodoList = if (todoListId != -1){
-             TodoList(
-                 todoListId,
-                 titleEditText.text.toString(),
-                 descriptionEditText.text.toString()
-             )
-         } else {
-             TodoList(
-                 null,
-                 titleEditText.text.toString(),
-                 descriptionEditText.text.toString()
-             )
-         }
-         thread {
-             //var insertedList: Int = db.TodoListDao().insert(todoList).toInt() // created simplified form. should delte if underline works
-             db.TodoListDao().insert(todoList)
-
-             // You neeed to save back the current state of the title/description to the itemsList.  Rememmber you ahve access to the id of the itemsList
-         }
-     }*/
-
     class todoListFocus(var listId: Int): View.OnFocusChangeListener {
         lateinit var title: EditText
         lateinit var description: EditText

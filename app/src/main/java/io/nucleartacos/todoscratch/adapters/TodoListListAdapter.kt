@@ -8,7 +8,6 @@ import android.widget.TextView
 import io.nucleartacos.todoscratch.R
 import io.nucleartacos.todoscratch.data.TodoList
 import io.nucleartacos.todoscratch.db
-import kotlin.concurrent.thread
 
 class TodoListListAdapter(val launchTodoListEditActivity: (Int?) -> Unit) : RecyclerView.Adapter<TodoListListAdapter.ViewHolder>() {
     val list = mutableListOf<TodoList>()
@@ -36,10 +35,8 @@ class TodoListListAdapter(val launchTodoListEditActivity: (Int?) -> Unit) : Recy
             descriptionTextView.text = list[index].description
 
 
-            view.setOnClickListener {
-                launchTodoListEditActivity(list[index].id)
-                true
-            }
+            view.setOnClickListener { launchTodoListEditActivity(list[index].id) }
+            titleTextView.setOnClickListener { launchTodoListEditActivity(list[index].id) }
 
             view.setOnLongClickListener{
                 db.TodoItemDao().deleteByListId(list[index].id!!)

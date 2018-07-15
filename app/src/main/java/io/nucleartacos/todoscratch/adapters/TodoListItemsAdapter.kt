@@ -1,20 +1,15 @@
 package io.nucleartacos.todoscratch
 
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
-import android.widget.EditText
 import android.widget.TextView
 import io.nucleartacos.todoscratch.data.TodoItem
-import io.nucleartacos.todoscratch.data.TodoList
 import kotlin.concurrent.thread
 
-    /*const val FOCUSED_TITLE = "Titile"
-    const val FOCUSED_BOX = "Box"*/
 
 class TodoListItemsAdapter(val todoListId: Int) : RecyclerView.Adapter<TodoListItemsAdapter.ViewHolder>() {
     val list = mutableListOf<TodoItem>()
